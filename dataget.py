@@ -26,14 +26,6 @@ user_struct = []
 
 MAX_DEPTH = 2
 
-with open("apikey.txt", 'r') as api_file:
-	API_KEY = api_file.read()
-	api_file.close()
-
-#	def Dataget(MAX_DEPTH = 1):
-#		self.MAX_DEPTH = MAX_DEPTH
-
-
 def getRatingsLink(username_f: str) -> str:
 	return 'https://letterboxd.com/' + username_f + '/films/ratings/page/'
 
@@ -125,27 +117,11 @@ def addTags(movie_url:str):
 	if movie_url in movies:
 		print('movie already exists: ', movie_url)
 		return
-
 	tags = set()
-		
-	r = urllib.request.urlopen('https://letterboxd.com' + movie_url).read()
-	soup = BeautifulSoup(r, 'html.parser')
-	tmdb_id = soup.find('body')['data-tmdb-id']
-
-	r = requests.get('https://api.themoviedb.org/3/movie/' + tmdb_id + '/keywords?api_key=' + API_KEY).json()
 	
-	try:
-		for keyword in r['keywords']:
-
-			tags.add(keyword['name'])
-
-			# try:
-			# tags[keyword] += tags[keyword] + 1
-			# except KeyError:
-			# tags[keyword] = 1
-
-	except KeyError:
-		return None
+		
+	r = urllib.request.urlopen('https://letterboxd.com' + movie_url + 'genres/').read()
+	soup = BeautifulSoup(r, 'html.parser')
 
 	genres = soup.find('div', {'id': 'tab-genres'})
 	if genres is None:
@@ -154,11 +130,6 @@ def addTags(movie_url:str):
 
 	for genre in genres:
 		tags.add(genre.contents[0])
-
-# print(genre.contents[0])
-# r = requests.get('https://api.themoviedb.org/3/movie/' + tmdb_id + '?api_key=' + API_KEY).json()
-# for genre in r['genres']:
-# print(genre['name'])
 
 	movies[movie_url] = tags
 	print("added movie tags for: ", movie_url)
@@ -176,6 +147,10 @@ def save_file():
 		ujson.dump(movies, movies_file)
 		movies_file.close()
 
+	with open('data/userstruct.json', 'w') as userstruct_file:
+		ujson.dump(user_struct, userstruct_file)
+		userstruct_file.close()
+
 	# Writing the user's tags as CSV
 	with open("data/data.csv", 'w') as csv_file:
 		for i, j in user_struct:
@@ -188,54 +163,15 @@ def save_file():
 			for tag in user_tags:
 				print(tag, end=',', file=csv_file)
 		csv_file.close()
-
-
+	
 
 
 users.add('grantwilson999')
-#addAllFollowers('grantwilson999', 1)
-#save_file()
 
 for user in users:
 	print("constructing info for user:", user)
 	user_struct.append((user, addAllRatings(user)))
 #	save_file()
 	print("movies: {}, users: {}".format(len(movies), len(users)))
+save_file()
 
-
-
-"""
-{ 'moviename' : set() -> pickled file }
-moviename,file
-
-"""
-"""
-with open('users.json', 'w') as users_file:
-	json.dump(user_struct, users_file)
-	users_file.close()
-
-with open('movies.json', 'w') as movies_file:
-	json.dump(movies, movies_file)
-	movies_file.close()
-	
-"""
-
-""""
-#	print(user_tags, ',', i, file=csv_file)
-
-#for tag in user_tags
-#	print(tag, separator=',')
-#	ptiny(user)
-	
-#with open("name_of_file.json", 'w') as some_variable:
-#    json.dump(my_object, some_variable)
-#    output_file.close()
-
-#with open("name_of_file.json", 'r') as some_variable:	
-#    my_object = json.load(some_variable)
-#    database_in.close()	
-	
-#with open('filename', 'wb') as myfile:
-#    wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-#    wr.writerow(mylist)	
-"""
