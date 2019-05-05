@@ -167,6 +167,7 @@ def save_file():
 
 
 users.add('grantwilson999')
+addAllFollowers('grantwilson999', 1)
 
 for user in users:
 	print("constructing info for user:", user)
